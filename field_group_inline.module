@@ -1,0 +1,86 @@
+<?php
+
+/**
+ * @file
+ * Make possible to show entity fields inline inside one group.
+ */
+
+/**
+ * Implements hook_field_group_formatter_info().
+ */
+function field_group_inline_field_group_formatter_info() {
+  return array(
+    'display' => array(
+      'inline' => array(
+        'label' => t('Inline elements'),
+        'instance_settings' => array(
+          'extra_classes' => '',
+          'separator' => '|',
+        ),
+      ),
+    ),
+  );
+}
+
+/**
+ * Implements hook_field_group_format_settings().
+ */
+function field_group_inline_field_group_format_settings($group) {
+  $form = array();
+
+  $mode = $group->mode == 'form' ? 'form' : 'display';
+  $field_group_types = field_group_formatter_info();
+  $formatter = $field_group_types[$mode][$group->format_type];
+  $default_settings = $formatter['instance_settings'];
+  $settings = $group->format_settings['instance_settings'];
+
+  if (isset($formatter['instance_settings']['separator'])) {
+    $form['instance_settings']['separator'] = array(
+      '#title' => t('Fields separator'),
+      '#type' => 'textfield',
+      '#default_value' => isset($settings['separator']) ?
+       $settings['separator'] : $default_settings['separator'],
+    );
+  }
+  if (isset($formatter['instance_settings']['extra_classes'])) {
+    $form['instance_settings']['extra_classes'] = array(
+      '#title' => t('Extra CSS classes'),
+      '#type' => 'textfield',
+      '#default_value' => isset($settings['extra_classes']) ?
+       $settings['extra_classes'] : $default_settings['extra_classes'],
+      '#element_validate' => array('field_group_validate_css_class'),
+    );
+  }
+  return $form;
+}
+
+/**
+ * Implements hook_field_group_pre_render().
+ */
+function field_group_inline_field_group_pre_render(&$element, $group, &$form) {
+  if ($group->format_type != 'inline') {
+    return;
+  }
+  $settings = $group->format_settings['instance_settings'];
+  $biggest_weight = 0;
+  foreach ($element as $field_name => $field) {
+    if ($biggest_weight <= $field['#weight']) {
+      $biggest_weight = $field['#weight'];
+      $biggest_weight_field = $field_name;
+    }
+    $element[$field_name]['#prefix'] = '<div class="field-group-inline-item">';
+    $element[$field_name]['#suffix'] = '<span class="field-group-inline-separator">' . check_plain($settings['separator']) . '</span></div>';
+  }
+  $element[$biggest_weight_field]['#suffix'] = '</div>';
+  $path = drupal_get_path('module', 'field_group_inline');
+  $group_class = str_replace('_', '-', $group->group_name);
+  $group->classes = ' field-group field-group-inline clearfix ' . $group->group_name . ' ' . $group_class . ' ' . $settings['extra_classes'];
+  
+  $element += array(
+    '#type' => 'markup',
+    '#weight' => $group->weight,
+    '#prefix' => '<div class="' . $group->classes . '">',
+    '#suffix' => '</div>',
+    '#attached' => array('css' => array($path . '/field_group_inline.css')),
+  );
+}
