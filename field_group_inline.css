@@ -1,6 +1,6 @@
 .field-group-inline * {
-  display: inline;
-  float: none;
+  display: inline !important;
+  float: none !important;
 }
 .field-group-inline .clearfix:after {
   display: inline;

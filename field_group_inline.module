@@ -39,7 +39,7 @@ function field_group_inline_field_group_format_settings($group) {
       '#title' => t('Fields separator'),
       '#type' => 'textfield',
       '#default_value' => isset($settings['separator']) ?
-       $settings['separator'] : $default_settings['separator'],
+        $settings['separator'] : $default_settings['separator'],
     );
   }
   if (isset($formatter['instance_settings']['extra_classes'])) {
@@ -47,7 +47,7 @@ function field_group_inline_field_group_format_settings($group) {
       '#title' => t('Extra CSS classes'),
       '#type' => 'textfield',
       '#default_value' => isset($settings['extra_classes']) ?
-       $settings['extra_classes'] : $default_settings['extra_classes'],
+        $settings['extra_classes'] : $default_settings['extra_classes'],
       '#element_validate' => array('field_group_validate_css_class'),
     );
   }
@@ -75,7 +75,7 @@ function field_group_inline_field_group_pre_render(&$element, $group, &$form) {
   $path = drupal_get_path('module', 'field_group_inline');
   $group_class = str_replace('_', '-', $group->group_name);
   $group->classes = ' field-group field-group-inline clearfix ' . $group->group_name . ' ' . $group_class . ' ' . $settings['extra_classes'];
-  
+
   $element += array(
     '#type' => 'markup',
     '#weight' => $group->weight,
