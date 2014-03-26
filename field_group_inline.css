@@ -5,6 +5,10 @@
 .field-group-inline .clearfix:after {
   display: inline;
 }
+.field-group-label {
+  display: block !important;
+  font-weight: bold;
+}
 .field-group-inline-separator {
   margin: 0 5px;
 }
