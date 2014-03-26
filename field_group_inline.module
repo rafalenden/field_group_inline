@@ -61,26 +61,83 @@ function field_group_inline_field_group_pre_render(&$element, $group, &$form) {
   if ($group->format_type != 'inline') {
     return;
   }
-  $settings = $group->format_settings['instance_settings'];
-  $biggest_weight = 0;
-  foreach ($element as $field_name => $field) {
-    if ($biggest_weight <= $field['#weight']) {
-      $biggest_weight = $field['#weight'];
-      $biggest_weight_field = $field_name;
-    }
-    $element[$field_name]['#prefix'] = '<div class="field-group-inline-item">';
-    $element[$field_name]['#suffix'] = '<span class="field-group-inline-separator">' . check_plain($settings['separator']) . '</span></div>';
-  }
-  $element[$biggest_weight_field]['#suffix'] = '</div>';
-  $path = drupal_get_path('module', 'field_group_inline');
-  $group_class = str_replace('_', '-', $group->group_name);
-  $group->classes = ' field-group field-group-inline clearfix ' . $group->group_name . ' ' . $group_class . ' ' . $settings['extra_classes'];
 
-  $element += array(
+  if (isset($group->format_settings['instance_settings'])) {
+    $settings = $group->format_settings['instance_settings'];
+  }
+  else {
+    $formatter = field_group_inline_field_group_formatter_info();
+    $settings = $formatter['display']['inline']['instance_settings'];
+  }
+
+  $fields = array();
+
+  foreach ($element as $field) {
+    if (empty($field['#items'])) {
+      continue;
+    }
+    if (empty($fields)) {
+      $fields[1] = $field;
+    }
+    else {
+      $fields[] = $field;
+    }
+  }
+
+  $element = array(
+    'content' => array(
     '#type' => 'markup',
+    '#markup' => theme('field_group_inline', array(
+      'group' => $group,
+      'label' => !empty($group->label) ? check_plain($group->label) : '',
+      'fields' => $fields,
+      'separator' => check_plain($settings['separator']),
+      'num_fields' => count($fields),
+    )),
     '#weight' => $group->weight,
-    '#prefix' => '<div class="' . $group->classes . '">',
-    '#suffix' => '</div>',
-    '#attached' => array('css' => array($path . '/field_group_inline.css')),
+    )
   );
+}
+
+/**
+ * Implements hook_theme().
+ */
+function field_group_inline_theme($existing, $type, $theme, $path) {
+  return array(
+    'field_group_inline' => array(
+      'variables' => array(
+        'group' => NULL, 'label' => NULL, 'fields' => NULL, 'separator' => NULL, 'num_fields' => NULL,
+      ),
+      'template' => 'field-group-inline',
+    ),
+  );
+}
+
+/**
+ * Preprocess variables for field-group-inline.tpl.php
+ */
+function template_preprocess_field_group_inline(&$variables) {
+  $variables['classes_array'] = array('field-group', 'field-group-inline', 'clearfix');
+  $variables['classes_array'][] = drupal_html_class($variables['group']->group_name);
+  $variables['classes_array'][] = $variables['group']->format_settings['instance_settings']['extra_classes'];
+
+  drupal_add_css(drupal_get_path('module', 'field_group_inline') . '/field_group_inline.css');
+
+  $group = $variables['group'];
+
+  $suggestons = array();
+  $entity_type = 'field_group_inline__' . $group->entity_type;
+
+  $suggestons[] = $entity_type;
+  $suggestons[] = $entity_type . '__' . $group->bundle;
+  $suggestons[] = $entity_type . '__' . $group->mode;
+  $suggestons[] = $entity_type . '__' . $group->bundle . '__' . $group->mode;
+
+  $suggestons[] = 'field_group_inline__' . $group->group_name;
+  $suggestons[] = $entity_type . '__' . $group->group_name;
+  $suggestons[] = $entity_type . '__' . $group->bundle . '__' . $group->group_name;
+  $suggestons[] = $entity_type . '__' . $group->mode . '__' . $group->group_name;
+  $suggestons[] = $entity_type . '__' . $group->bundle . '__' . $group->mode;
+
+  $variables['theme_hook_suggestions'] += $suggestons;
 }

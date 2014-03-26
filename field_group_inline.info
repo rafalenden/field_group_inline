@@ -1,4 +1,4 @@
-name = Field group Inline
+name = Field Group Inline
 description = Show every field inside group as inline element.
 package = Fields
 core = 7.x
