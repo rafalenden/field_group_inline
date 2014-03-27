@@ -86,16 +86,14 @@ function field_group_inline_field_group_pre_render(&$element, $group, &$form) {
 
   $element = array(
     'content' => array(
-    '#type' => 'markup',
-    '#markup' => theme('field_group_inline', array(
-      'group' => $group,
-      'label' => !empty($group->label) ? check_plain($group->label) : '',
-      'fields' => $fields,
-      'separator' => check_plain($settings['separator']),
-      'num_fields' => count($fields),
-    )),
+      '#theme' => 'field_group_inline',
+      '#group' => $group,
+      '#label' => !empty($group->label) ? check_plain($group->label) : '',
+      '#fields' => $fields,
+      '#separator' => check_plain($settings['separator']),
+      '#num_fields' => count($fields),
+    ),
     '#weight' => $group->weight,
-    )
   );
 }
 
