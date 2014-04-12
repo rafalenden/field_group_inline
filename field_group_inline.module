@@ -135,7 +135,6 @@ function template_preprocess_field_group_inline(&$variables) {
   $suggestons[] = $entity_type . '__' . $group->group_name;
   $suggestons[] = $entity_type . '__' . $group->bundle . '__' . $group->group_name;
   $suggestons[] = $entity_type . '__' . $group->mode . '__' . $group->group_name;
-  $suggestons[] = $entity_type . '__' . $group->bundle . '__' . $group->mode;
 
   $variables['theme_hook_suggestions'] += $suggestons;
 }
