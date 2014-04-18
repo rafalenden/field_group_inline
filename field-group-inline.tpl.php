@@ -6,24 +6,25 @@
  * Available variables:
  * - $group
  * - $label
- * - $fields
- * - $class
+ * - $items
+ * - $classes
  * - $separator
- * - $num_fields
  */
 ?>
 
-<?php if ($fields): ?>
+<?php if ($items): ?>
   <div class="<?php print $classes; ?>">
   <?php if ($label): ?>
     <div class="field-group-label"><?php print $label; ?></div>
   <?php endif; ?>
 
-  <?php foreach($fields as $key => $field): ?>
+  <?php foreach ($items as $key => $item): ?>
     <div class="field-group-inline-item item-<?php print $key; ?>">
-      <?php print render($field); ?>
+      <?php $last = $item == end($items); ?>
 
-      <?php if ($key != $num_fields): ?>
+      <?php print render($item); ?>
+
+      <?php if (!$last): ?>
         <span class="field-group-inline-separator"><?php print $separator; ?></span>
       <?php endif; ?>
     </div>

@@ -55,13 +55,9 @@ function field_group_inline_field_group_format_settings($group) {
 }
 
 /**
- * Implements hook_field_group_pre_render().
+ * Implements field_group_pre_render_<format-type>.
  */
-function field_group_inline_field_group_pre_render(&$element, $group, &$form) {
-  if ($group->format_type != 'inline') {
-    return;
-  }
-
+function field_group_pre_render_inline(&$element, $group, &$form) {
   if (isset($group->format_settings['instance_settings'])) {
     $settings = $group->format_settings['instance_settings'];
   }
@@ -70,30 +66,18 @@ function field_group_inline_field_group_pre_render(&$element, $group, &$form) {
     $settings = $formatter['display']['inline']['instance_settings'];
   }
 
-  $fields = array();
-
-  foreach ($element as $field) {
-    if (empty($field['#items'])) {
-      continue;
-    }
-    if (empty($fields)) {
-      $fields[1] = $field;
-    }
-    else {
-      $fields[] = $field;
+  $items = array();
+  foreach ($group->children as $group_name) {
+    if (!empty($element[$group_name])) {
+      $items[$group_name] = &$element[$group_name];
     }
   }
 
-  $element = array(
-    'content' => array(
-      '#theme' => 'field_group_inline',
-      '#group' => $group,
-      '#label' => !empty($group->label) ? check_plain($group->label) : '',
-      '#fields' => $fields,
-      '#separator' => check_plain($settings['separator']),
-      '#num_fields' => count($fields),
-    ),
-    '#weight' => $group->weight,
+  $element += array(
+    '#theme' => 'field_group_inline',
+    '#group' => $group,
+    '#items' => $items,
+    '#separator' => check_plain($settings['separator']),
   );
 }
 
@@ -104,7 +88,7 @@ function field_group_inline_theme($existing, $type, $theme, $path) {
   return array(
     'field_group_inline' => array(
       'variables' => array(
-        'group' => NULL, 'label' => NULL, 'fields' => NULL, 'separator' => NULL, 'num_fields' => NULL,
+        'group' => NULL, 'items' => NULL, 'separator' => NULL,
       ),
       'template' => 'field-group-inline',
     ),
@@ -115,6 +99,8 @@ function field_group_inline_theme($existing, $type, $theme, $path) {
  * Preprocess variables for field-group-inline.tpl.php
  */
 function template_preprocess_field_group_inline(&$variables) {
+  $variables['label'] = !empty($variables['group']->label) ? check_plain($variables['group']->label) : '';
+
   $variables['classes_array'] = array('field-group', 'field-group-inline', 'clearfix');
   $variables['classes_array'][] = drupal_html_class($variables['group']->group_name);
   $variables['classes_array'][] = $variables['group']->format_settings['instance_settings']['extra_classes'];
